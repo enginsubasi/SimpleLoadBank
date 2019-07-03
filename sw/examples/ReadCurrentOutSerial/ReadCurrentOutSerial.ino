@@ -1,52 +1,76 @@
-/*
-  Analog input, analog output, serial output
+/**
+  ******************************************************************************
+  *
+  * @file:      ReadCurrentOutSerial
+  * @author:    Engin Subasi
+  * @e-mail:    enginsubasi@gmail.com
+  * @address:   github.com/enginsubasi/SimpleLoadBank
+  *
+  * @version:   v 0.0.1
+  * @cdate:     30/06/2019
+  * @mdate:     30/06/2019
+  * @history:   30/06/2019 Created
+  *
+  * @about:     Read current out serial
+  * @device:    Generic Arduino boards
+  *
+  * @content:
+  *     FUNCTIONS:
+  *         adcToCurrent    : Returns current value in milliamps
+  *         
+  * @notes:
+  *
+  ******************************************************************************
+  */
 
-  Reads an analog input pin, maps the result to a range from 0 to 255 and uses
-  the result to set the pulse width modulation (PWM) of an output pin.
-  Also prints the results to the Serial Monitor.
+const double rshunt = 0.050;  // Ohm
+const double ri     = 3000;   // Ohm
+const double rf     = 3000;   // Ohm
+double gain = 0;
 
-  The circuit:
-  - potentiometer connected to analog pin 0.
-    Center pin of the potentiometer goes to the analog pin.
-    side pins of the potentiometer go to +5V and ground
-  - LED connected from digital pin 9 to ground
+uint32_t sensorValue = 0;
+double currentValue = 0;
 
-  created 29 Dec. 2008
-  modified 9 Apr 2012
-  by Tom Igoe
+const uint32_t adcVoltageRef = 5;
+const uint32_t adcUpValue = 1023;
+const int analogInPin = A0;  // Analog input pin that the SLB output is attached to
 
-  This example code is in the public domain.
-
-  http://www.arduino.cc/en/Tutorial/AnalogInOutSerial
-*/
-
-// These constants won't change. They're used to give names to the pins used:
-const int analogInPin = A0;  // Analog input pin that the potentiometer is attached to
-const int analogOutPin = 9; // Analog output pin that the LED is attached to
-
-int sensorValue = 0;        // value read from the pot
-int outputValue = 0;        // value output to the PWM (analog out)
 
 void setup() {
   // initialize serial communications at 9600 bps:
-  Serial.begin(9600);
+  Serial.begin(115200);
+
+  gain = 1 + ( rf / ri );
 }
 
 void loop() {
   // read the analog in value:
   sensorValue = analogRead(analogInPin);
-  // map it to the range of the analog out:
-  outputValue = map(sensorValue, 0, 1023, 0, 255);
-  // change the analog out value:
-  analogWrite(analogOutPin, outputValue);
+
+  currentValue = adcToCurrentMilliamp ( sensorValue );
 
   // print the results to the Serial Monitor:
   Serial.print("sensor = ");
   Serial.print(sensorValue);
   Serial.print("\t output = ");
-  Serial.println(outputValue);
+  Serial.println(currentValue2);
 
   // wait 2 milliseconds before the next loop for the analog-to-digital
   // converter to settle after the last reading:
   delay(2);
+}
+
+double adcToCurrentMilliamp ( uint32_t adcValue )
+{
+  double current = 0;
+
+  current = adcValue; /* to cast operation in double domain */
+
+  current = ( ( current * adcVoltageRef ) / adcUpValue );
+
+  current /= gain;
+
+  current /= rshunt;
+
+  return ( current );
 }
