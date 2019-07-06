@@ -24,8 +24,8 @@
   */
 
 const double rshunt = 0.050;  // Ohm
-const double ri     = 3000;   // Ohm
-const double rf     = 3000;   // Ohm
+const double ri     = 1100;   // Ohm
+const double rf     = 22000;   // Ohm
 double gain = 0;
 
 uint32_t sensorValue = 0;
@@ -50,14 +50,12 @@ void loop() {
   currentValue = adcToCurrentMilliamp ( sensorValue );
 
   // print the results to the Serial Monitor:
-  Serial.print("sensor = ");
-  Serial.print(sensorValue);
-  Serial.print("\t output = ");
-  Serial.println(currentValue2);
+  Serial.print("Current = ");
+  Serial.println(currentValue);
 
   // wait 2 milliseconds before the next loop for the analog-to-digital
   // converter to settle after the last reading:
-  delay(2);
+  delay(10);
 }
 
 double adcToCurrentMilliamp ( uint32_t adcValue )
