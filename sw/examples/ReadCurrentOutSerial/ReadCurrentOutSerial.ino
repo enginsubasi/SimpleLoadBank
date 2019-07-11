@@ -10,6 +10,7 @@
   * @cdate:     30/06/2019
   * @mdate:     30/06/2019
   * @history:   30/06/2019 Created
+  *             12/07/2019 Updated, tested, verified. It's working.
   *
   * @about:     Read current out serial
   * @device:    Generic Arduino boards
@@ -29,7 +30,7 @@ const double rf     = 22000;   // Ohm
 double gain = 0;
 
 uint32_t sensorValue = 0;
-double currentValue = 0;
+double currentValue = 0, currentValueFilt = 0;
 
 const uint32_t adcVoltageRef = 5;
 const uint32_t adcUpValue = 1023;
@@ -49,17 +50,22 @@ void loop() {
 
   currentValue = adcToCurrentMilliamp ( sensorValue );
 
+  currentValueFilt = ( currentValueFilt * 0.95 ) + ( currentValue * 0.05 ); // Exponential moving average filter
+
   // print the results to the Serial Monitor:
   Serial.print("Current = ");
-  Serial.println(currentValue);
+  Serial.print(currentValue);
+  Serial.print("   ");
+  Serial.println(currentValueFilt);
 
-  // wait 2 milliseconds before the next loop for the analog-to-digital
+  // wait 10 milliseconds before the next loop for the analog-to-digital
   // converter to settle after the last reading:
   delay(10);
 }
 
 double adcToCurrentMilliamp ( uint32_t adcValue )
 {
+  // This calculation was not simplified for easy understanding.
   double current = 0;
 
   current = adcValue; /* to cast operation in double domain */
